@@ -21,11 +21,11 @@ const LoginPage = () => {
                   Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-emerald-500">Green Vehicle Expo</span>
                 </h1>
                 <p className="text-xl text-muted-foreground max-w-lg">
-                  Sign in to access exclusive features like personalized visit planning, 
+                  Sign in to access exclusive features like personalized visit planning,
                   interactive maps, and more!
                 </p>
               </motion.div>
-              
+
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -41,7 +41,7 @@ const LoginPage = () => {
                   <h3 className="font-semibold">Personalized Plans</h3>
                   <p className="text-sm text-muted-foreground">Custom visit itineraries</p>
                 </div>
-                
+
                 <div className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -51,7 +51,7 @@ const LoginPage = () => {
                   <h3 className="font-semibold">Interactive Maps</h3>
                   <p className="text-sm text-muted-foreground">Find exhibitors easily</p>
                 </div>
-                
+
                 <div className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 rounded-full bg-teal/10 flex items-center justify-center mb-3">
                     <div className="w-8 h-8 rounded-full bg-teal/20 flex items-center justify-center">
@@ -61,7 +61,7 @@ const LoginPage = () => {
                   <h3 className="font-semibold">Session Booking</h3>
                   <p className="text-sm text-muted-foreground">Reserve your spots</p>
                 </div>
-                
+
                 <div className="flex flex-col items-center text-center">
                   <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -73,7 +73,7 @@ const LoginPage = () => {
                 </div>
               </motion.div>
             </div>
-            
+
             <div className="lg:w-1/2">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -81,6 +81,17 @@ const LoginPage = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <LoginForm />
+
+                {/* Admin Access Hint */}
+                <div className="mt-8 p-4 bg-teal/5 border border-teal/20 rounded-xl text-center">
+                  <p className="text-sm font-semibold text-teal-800 mb-1">👑 Admin Demo Access</p>
+                  <p className="text-xs text-muted-foreground">
+                    Email: <code className="bg-white px-1 py-0.5 rounded border border-gray-200 font-mono text-teal-700">admin@greenvehicleexpo.com</code>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Password: <span className="italic">Any password</span>
+                  </p>
+                </div>
               </motion.div>
             </div>
           </div>

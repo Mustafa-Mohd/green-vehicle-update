@@ -99,9 +99,23 @@ export const LoginForm = () => {
         }
       }
       */
-      
+
       // Redirect to the green vehicle expo page after login
-      navigate("/events/green-vehicle-expo");
+      // Check if user should go to admin dashboard
+      /* 
+      // For demo purposes checking email
+      if (userData.email.includes('admin')) {
+         navigate("/admin");
+      } else {
+         navigate("/events/green-vehicle-expo");
+      }
+      */
+
+      if (userData.email.includes('admin')) {
+        navigate("/admin");
+      } else {
+        navigate("/events/green-vehicle-expo");
+      }
     } catch (err: any) {
       setError(err.error_description || err.message);
     } finally {
@@ -186,7 +200,7 @@ export const LoginForm = () => {
         setError("Please check your email for confirmation. A confirmation email has been sent.");
       }
       */
-      
+
       // Redirect to the green vehicle expo page after signup (without authentication)
       navigate("/events/green-vehicle-expo");
     } catch (err: any) {
@@ -213,8 +227,8 @@ export const LoginForm = () => {
             {authMode === "login" ? "Welcome Back" : "Join Expo"}
           </CardTitle>
           <CardDescription>
-            {authMode === "login" 
-              ? "Sign in to access exclusive features" 
+            {authMode === "login"
+              ? "Sign in to access exclusive features"
               : "Create an account to personalize your expo experience"}
           </CardDescription>
         </CardHeader>
@@ -237,7 +251,7 @@ export const LoginForm = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="company">Company</Label>
                   <div className="relative">
@@ -252,7 +266,7 @@ export const LoginForm = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
                   <div className="relative">
@@ -269,7 +283,7 @@ export const LoginForm = () => {
                 </div>
               </>
             )}
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -286,7 +300,7 @@ export const LoginForm = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -311,7 +325,7 @@ export const LoginForm = () => {
                 </button>
               </div>
             </div>
-            
+
             {authMode === "login" && (
               <div className="text-right">
                 <button
@@ -325,7 +339,7 @@ export const LoginForm = () => {
                 </button>
               </div>
             )}
-            
+
             {error && (
               <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md text-destructive text-sm">
                 {error}
@@ -333,8 +347,8 @@ export const LoginForm = () => {
             )}
           </CardContent>
           <CardFooter className="flex flex-col">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-gradient-to-r from-teal to-emerald-500 hover:from-teal/90 hover:to-emerald-500/90 text-white py-6 text-lg"
               disabled={loading}
             >
@@ -349,9 +363,9 @@ export const LoginForm = () => {
                 "Create Account"
               )}
             </Button>
-            
+
             <Separator className="my-6" />
-            
+
             <div className="text-center text-sm">
               {authMode === "login" ? "Don't have an account?" : "Already have an account?"}
               <button

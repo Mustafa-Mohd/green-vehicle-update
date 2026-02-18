@@ -9,7 +9,10 @@ import GreenVehicleExpo from "./pages/GreenVehicleExpo";
 import AboutOrganizerPage from "./pages/AboutOrganizerPage";
 import LoginPage from "./pages/LoginPage";
 import ContactPage from "./pages/ContactPage";
+
+import SponsorshipPage from "./pages/SponsorshipPage";
 import ScrollToTop from "./components/ScrollToTop";
+import { ChatBot } from "./components/ChatBot";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +21,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <ChatBot />
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
@@ -26,6 +30,8 @@ const App = () => (
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/events/green-vehicle-expo" element={<GreenVehicleExpo />} />
           <Route path="/events/green-vehicle-expo/about" element={<AboutOrganizerPage />} />
+          <Route path="/events/green-vehicle-expo/sponsorship" element={<SponsorshipPage />} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

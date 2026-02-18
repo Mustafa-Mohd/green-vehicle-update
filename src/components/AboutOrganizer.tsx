@@ -2,17 +2,19 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Users, 
-  Globe, 
-  Building2, 
-  Award, 
-  MapPin, 
+import {
+  Users,
+  Globe,
+  Building2,
+  Award,
+  MapPin,
   Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ZoomIn,
+  X
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const galleryImages = [
   "https://greenvehicleexpo.com/wp-content/uploads/2022/01/WhatsApp-Image-2022-01-14-at-13.00.55.jpeg",
@@ -53,7 +55,7 @@ export const AboutOrganizer = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-teal/10 to-background">
+      <section className="relative py-12 md:py-20 bg-gradient-to-b from-teal/10 to-background">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="container relative">
           <div className="max-w-4xl mx-auto text-center">
@@ -74,7 +76,7 @@ export const AboutOrganizer = () => {
       </section>
 
       {/* Main Content */}
-      <section className="py-20">
+      <section className="py-12 md:py-20">
         <div className="container">
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Main Content */}
@@ -166,8 +168,8 @@ export const AboutOrganizer = () => {
                 <Card className="border-teal/20 bg-gradient-to-br from-teal/5 to-emerald-500/5">
                   <CardContent className="p-6">
                     <div className="flex items-center mb-4">
-                      <img 
-                        src="https://greenvehicleexpo.com/wp-content/uploads/2021/12/karnatka.png" 
+                      <img
+                        src="https://greenvehicleexpo.com/wp-content/uploads/2021/12/karnatka.png"
                         alt="Karnataka Logo"
                         className="w-16 h-16 object-contain"
                       />
@@ -217,7 +219,7 @@ export const AboutOrganizer = () => {
       </section>
 
       {/* Gallery Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-teal/5">
+      <section className="py-12 md:py-20 bg-gradient-to-b from-background to-teal/5">
         <div className="container">
           <div className="text-center mb-16">
             <Badge className="bg-teal/20 text-teal border-teal/30 mb-6">
@@ -227,69 +229,109 @@ export const AboutOrganizer = () => {
               Event <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-emerald-500">Highlights</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Capturing memorable moments from our successful events
+              Capturing memorable moments from our successful events. Click on any image to view in full size.
             </p>
           </div>
 
-          {/* Featured Image Carousel */}
-          <div className="relative mb-12">
-            <div className="relative h-96 rounded-2xl overflow-hidden">
-              <img 
-                src={galleryImages[currentImageIndex]}
-                alt={`Gallery ${currentImageIndex + 1}`}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-              <div className="absolute bottom-6 left-6 right-6">
-                <h3 className="text-2xl font-bold text-white">Event Highlight #{currentImageIndex + 1}</h3>
-                <p className="text-white/80">Memorable moment from our events</p>
-              </div>
-            </div>
-            
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm hover:bg-white"
-              onClick={prevImage}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm hover:bg-white"
-              onClick={nextImage}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
-          </div>
-
-          {/* Thumbnail Gallery */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {/* Masonry Grid Gallery */}
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
             {galleryImages.map((image, index) => (
-              <button
+              <motion.div
                 key={index}
-                className={`relative aspect-square rounded-lg overflow-hidden transition-all ${
-                  index === currentImageIndex 
-                    ? "ring-4 ring-teal scale-105" 
-                    : "hover:scale-105 hover:ring-2 hover:ring-teal/50"
-                }`}
-                onClick={() => goToImage(index)}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="break-inside-avoid relative group cursor-pointer rounded-2xl overflow-hidden shadow-lg border border-teal/10 bg-white"
+                onClick={() => {
+                  setCurrentImageIndex(index);
+                  setExpandedGallery(true);
+                }}
               >
-                <img 
+                <img
                   src={image}
-                  alt={`Gallery thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  alt={`Event Highlight ${index + 1}`}
+                  className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-105"
+                  loading="lazy"
                 />
-              </button>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                  <p className="text-white font-medium flex items-center gap-2">
+                    <span className="bg-teal/80 p-2 rounded-full backdrop-blur-sm">
+                      <ZoomIn className="w-4 h-4 text-white" />
+                    </span>
+                    View Full Size
+                  </p>
+                </div>
+              </motion.div>
             ))}
           </div>
+
+          {/* Lightbox Modal */}
+          <AnimatePresence>
+            {expandedGallery && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
+                onClick={() => setExpandedGallery(false)}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full z-50"
+                  onClick={() => setExpandedGallery(false)}
+                >
+                  <X className="w-8 h-8" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full z-50 hidden md:flex"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevImage();
+                  }}
+                >
+                  <ChevronLeft className="w-10 h-10" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 rounded-full z-50 hidden md:flex"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextImage();
+                  }}
+                >
+                  <ChevronRight className="w-10 h-10" />
+                </Button>
+
+                <div className="relative max-w-7xl max-h-[90vh] w-full flex items-center justify-center">
+                  <motion.img
+                    key={currentImageIndex}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    src={galleryImages[currentImageIndex]}
+                    alt="Full screen view"
+                    className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="absolute bottom-4 left-0 right-0 text-center text-white/80 pointer-events-none">
+                    Image {currentImageIndex + 1} of {galleryImages.length}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
 
       {/* More Information Section */}
-      <section className="py-20">
+      <section className="py-12 md:py-20">
         <div className="container">
           <div className="max-w-4xl mx-auto space-y-12">
             <motion.div

@@ -37,7 +37,7 @@ export const Footer = () => {
               </div>
             </a>
             <p className="text-primary-foreground/60 text-sm leading-relaxed mb-6">
-              India's leading B2B trade expo organizer connecting industries, 
+              India's leading B2B trade expo organizer connecting industries,
               creating opportunities, and driving business growth since 2015.
             </p>
             <div className="flex gap-3">
@@ -46,9 +46,9 @@ export const Footer = () => {
                 { icon: Instagram, href: "#" },
                 { icon: Linkedin, href: "#" },
                 { icon: Twitter, href: "#" },
-              ].map(({ icon: Icon, href }) => (
+              ].map(({ icon: Icon, href }, index) => (
                 <a
-                  key={href}
+                  key={index}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"

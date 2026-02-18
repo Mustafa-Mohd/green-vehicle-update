@@ -113,3 +113,103 @@ CREATE POLICY "Users can view own messages" ON contact_messages
 
 CREATE POLICY "Admin can manage all messages" ON contact_messages
   FOR ALL USING (auth.role() = 'service_role');
+
+
+-- ---------------------------------------------------------
+-- NEW TABLES FOR EXPO FEATURES (Plan My Visit, Map, etc.)
+-- ---------------------------------------------------------
+
+-- Exhibitors
+CREATE TABLE exhibitors (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  name TEXT NOT NULL,
+  category TEXT NOT NULL, -- 'two-wheeler', 'three-wheeler', etc.
+  location TEXT NOT NULL,
+  booth_number TEXT NOT NULL,
+  description TEXT,
+  contact TEXT,
+  technologies TEXT[], -- Array of strings
+  estimated_time TEXT
+);
+
+ALTER TABLE exhibitors ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read exhibitors" ON exhibitors FOR SELECT USING (true);
+CREATE POLICY "Admin manage exhibitors" ON exhibitors FOR ALL USING (auth.role() = 'service_role');
+
+
+-- Sessions
+CREATE TABLE sessions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  title TEXT NOT NULL,
+  speaker TEXT NOT NULL,
+  time TIMESTAMP WITH TIME ZONE NOT NULL,
+  location TEXT NOT NULL,
+  category TEXT NOT NULL,
+  duration TEXT NOT NULL,
+  description TEXT,
+  attendees INTEGER DEFAULT 0
+);
+
+ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read sessions" ON sessions FOR SELECT USING (true);
+CREATE POLICY "Admin manage sessions" ON sessions FOR ALL USING (auth.role() = 'service_role');
+
+
+-- Demos
+CREATE TABLE demos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  location TEXT NOT NULL,
+  estimated_time TEXT,
+  description TEXT,
+  features TEXT[]
+);
+
+ALTER TABLE demos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read demos" ON demos FOR SELECT USING (true);
+CREATE POLICY "Admin manage demos" ON demos FOR ALL USING (auth.role() = 'service_role');
+
+
+-- Pavilions (for Map)
+CREATE TABLE pavilions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  status TEXT DEFAULT 'available', -- 'available', 'occupied', 'reserved'
+  coordinates JSONB NOT NULL, -- {x: number, y: number}
+  size TEXT NOT NULL, -- 'small', 'medium', 'large'
+  booth_number TEXT,
+  description TEXT,
+  contact TEXT,
+  technologies TEXT[]
+);
+
+ALTER TABLE pavilions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read pavilions" ON pavilions FOR SELECT USING (true);
+CREATE POLICY "Admin manage pavilions" ON pavilions FOR ALL USING (auth.role() = 'service_role');
+
+
+-- Visit Plans
+CREATE TABLE visit_plans (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users,
+  form_data JSONB NOT NULL, -- Stores purpose, interests, timeAvailability
+  results JSONB NOT NULL -- Stores generated exhibitors, sessions, demos, route
+);
+
+ALTER TABLE visit_plans ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can create visit plans" ON visit_plans
+  FOR INSERT TO authenticated, anon WITH CHECK (true);
+
+CREATE POLICY "Users can view own visit plans" ON visit_plans
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Admin can view all visit plans" ON visit_plans
+  FOR SELECT TO service_role USING (true);

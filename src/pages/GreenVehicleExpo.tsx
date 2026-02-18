@@ -9,6 +9,8 @@ import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { GreenVehicleExpoHeader } from "@/components/GreenVehicleExpoHeader";
 import { StallBookingForm } from "@/components/StallBookingForm";
 import { ContactForm } from "@/components/ContactForm";
+import { EVCalculator } from "@/components/EVCalculator";
+import { VantaSection } from "@/components/VantaSection";
 import { useNavigate } from "react-router-dom";
 
 const TypeWriter = ({ text, speed = 30 }: { text: string; speed?: number }) => {
@@ -103,8 +105,8 @@ const GreenVehicleExpo = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 50 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.8 }
     }
@@ -112,8 +114,8 @@ const GreenVehicleExpo = () => {
 
   const slideInLeft = {
     hidden: { opacity: 0, x: -100 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: { duration: 0.8 }
     }
@@ -121,8 +123,8 @@ const GreenVehicleExpo = () => {
 
   const slideInRight = {
     hidden: { opacity: 0, x: 100 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: { duration: 0.8 }
     }
@@ -135,17 +137,17 @@ const GreenVehicleExpo = () => {
       {/* Hero Section */}
       <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Parallax Background */}
-        <motion.div 
+        <motion.div
           style={{ scale: heroScale }}
           className="absolute inset-0"
         >
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ 
+            style={{
               backgroundImage: "url('https://greenvehicleexpo.com/wp-content/uploads/2021/12/about_bg.jpg')",
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-background/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background/90" />
         </motion.div>
 
         {/* Animated particles */}
@@ -178,10 +180,10 @@ const GreenVehicleExpo = () => {
             transition={{ duration: 0.8 }}
             className="mb-8"
           >
-            <img 
+            <img
               src="https://greenvehicleexpo.com/wp-content/uploads/2019/05/Green-Vehicle-Expo-2026-logo-with-date.png"
               alt="Green Vehicle Expo 2026"
-              className="h-32 md:h-48 mx-auto drop-shadow-2xl"
+              className="h-24 md:h-48 mx-auto drop-shadow-2xl"
             />
           </motion.div>
 
@@ -189,7 +191,7 @@ const GreenVehicleExpo = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6"
+            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-6 px-4"
           >
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal via-emerald-400 to-teal">
               The Future Is
@@ -230,7 +232,7 @@ const GreenVehicleExpo = () => {
         </motion.div>
 
         {/* Scroll indicator */}
-        <motion.div 
+        <motion.div
           className="absolute bottom-10 left-1/2 -translate-x-1/2"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -238,6 +240,9 @@ const GreenVehicleExpo = () => {
           <ChevronDown className="w-8 h-8 text-teal" />
         </motion.div>
       </section>
+
+      {/* Vanta Animation Section */}
+      <VantaSection />
 
       {/* YouTube Video Section */}
       <div className="py-20 container">
@@ -261,7 +266,7 @@ const GreenVehicleExpo = () => {
                 whileHover={{ scale: 1.05, y: -10 }}
                 className="text-center p-6 bg-card/50 backdrop-blur-xl rounded-3xl border border-teal/20 shadow-lg hover:shadow-teal/20 transition-all duration-500"
               >
-                <motion.div 
+                <motion.div
                   className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-teal/30"
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.8 }}
@@ -279,9 +284,9 @@ const GreenVehicleExpo = () => {
       </section>
 
       {/* About Section with Typing Effect */}
-      <section className="py-24 relative overflow-hidden">
+      <section id="about" className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-teal/5 via-transparent to-emerald-500/5" />
-        
+
         <div className="container relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -292,25 +297,25 @@ const GreenVehicleExpo = () => {
             >
               <ParallaxSection offset={30}>
                 <div className="relative">
-                  <motion.div 
+                  <motion.div
                     className="absolute -inset-4 bg-gradient-to-r from-teal/20 to-emerald-500/20 rounded-3xl blur-2xl"
                     animate={{ opacity: [0.5, 0.8, 0.5] }}
                     transition={{ duration: 3, repeat: Infinity }}
                   />
-                  <img 
-                    src="https://img.freepik.com/free-vector/flat-illustration-social-media-day-celebration_23-2150340641.jpg?semt=ais_hybrid&w=740&q=80"
+                  <img
+                    src="https://cdn.growthjockey.com/blogs/future-of-ev-in-the-global-market--trends-and-growth-predictions-blog-feature-image.jpeg"
                     alt="The Future Is Electric Vehicle"
-                    className="relative rounded-3xl shadow-2xl border border-teal/20 object-cover"
-                    style={{ height: '500px', width: '100%' }}
+                    style={{ width: '100%' }}
+                    className="relative rounded-3xl shadow-2xl border border-teal/20 object-cover h-[300px] md:h-[500px]"
                   />
-                  
+
                   {/* Floating badge */}
                   <motion.div
                     className="absolute -bottom-6 -right-6 bg-gradient-to-br from-teal to-emerald-500 text-white px-6 py-4 rounded-2xl shadow-xl"
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 3, repeat: Infinity }}
                   >
-                    <div className="text-2xl font-bold">$180B</div>
+                    <div className="text-2xl font-bold">₹15 Lakh Crores</div>
                     <div className="text-sm opacity-90">Investment by 2030</div>
                   </motion.div>
                 </div>
@@ -342,7 +347,7 @@ const GreenVehicleExpo = () => {
 
               <div className="text-muted-foreground text-lg leading-relaxed space-y-4">
                 <p>
-                  <TypeWriter 
+                  <TypeWriter
                     text="The Indian Automobile sector can be said to be broadly divided into 79% of Two Wheelers, 4% of 3 Wheelers, 12% of economy cars, 2% of High end cars and rest forming other vehicle segments."
                     speed={20}
                   />
@@ -354,7 +359,7 @@ const GreenVehicleExpo = () => {
                   The Phase-II of FAME Scheme has an outlay of <span className="text-teal font-semibold">₹10,000 crore</span> for a period of 3 years from 1st April 2019. 86% of the fund has been allocated for creating a demand of XEVs.
                 </p>
                 <p className="text-foreground/80">
-                  This opens up investment opportunities of about <span className="text-teal font-semibold">$180 billion by 2030</span> and an annual battery capacity requirement of <span className="text-teal font-semibold">158 GWh</span>. The sales of electric vehicles are expected to grow from half million in FY2020 to <span className="text-teal font-semibold">100 million by 2030</span>.
+                  This opens up investment opportunities of about <span className="text-teal font-semibold">₹15 Lakh Crores by 2030</span> and an annual battery capacity requirement of <span className="text-teal font-semibold">158 GWh</span>. The sales of electric vehicles are expected to grow from half million in FY2020 to <span className="text-teal font-semibold">100 million by 2030</span>.
                 </p>
               </div>
             </motion.div>
@@ -363,7 +368,7 @@ const GreenVehicleExpo = () => {
       </section>
 
       {/* Highlights Section */}
-      <section className="py-24 bg-gradient-to-b from-teal/5 via-background to-background relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-teal/5 via-background to-background relative overflow-hidden">
         {/* Animated background lines */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(5)].map((_, i) => (
@@ -407,7 +412,7 @@ const GreenVehicleExpo = () => {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                whileHover={{ 
+                whileHover={{
                   scale: 1.05,
                   rotateY: 5,
                   z: 50
@@ -418,9 +423,9 @@ const GreenVehicleExpo = () => {
                 <div className="relative bg-gradient-to-br from-card via-card to-teal/5 backdrop-blur-xl border border-teal/20 rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:shadow-teal/20 transition-all duration-500 overflow-hidden h-full">
                   {/* Glow effect */}
                   <div className="absolute -inset-1 bg-gradient-to-r from-teal/20 to-emerald-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
+
                   <div className="relative z-10">
-                    <motion.div 
+                    <motion.div
                       className="w-14 h-14 mb-6 bg-gradient-to-br from-teal to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"
                       whileHover={{ rotate: 360 }}
                       transition={{ duration: 0.8 }}
@@ -441,20 +446,43 @@ const GreenVehicleExpo = () => {
         </div>
       </section>
 
+      {/* EV Calculator Section */}
+      <section id="calculator" className="py-20 bg-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-teal/5 -skew-y-3 transform origin-top-left scale-110"></div>
+        <div className="container relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal/10 rounded-full border border-teal/30 mb-6">
+              <Zap className="w-4 h-4 text-teal" />
+              <span className="text-teal font-semibold text-sm uppercase tracking-wider">Go Electric</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal to-emerald-500">
+                Calculate Your Savings
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
+              Discover how much you can save by switching to an electric vehicle today.
+            </p>
+          </div>
+          <EVCalculator />
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-teal via-emerald-500 to-teal opacity-90" />
-        
+      <section className="py-16 md:py-24 relative overflow-hidden" style={{ backgroundColor: '#020617' }}>
+        {/* Darker, richer background overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#052322] to-[#020617] -z-10" />
+
         {/* Animated shapes */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden opacity-30 -z-10">
           <motion.div
-            className="absolute w-96 h-96 bg-white/10 rounded-full -top-48 -left-48"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            className="absolute w-96 h-96 bg-teal-500/20 rounded-full -top-48 -left-48 blur-3xl"
+            animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           />
           <motion.div
-            className="absolute w-72 h-72 bg-white/10 rounded-full -bottom-36 -right-36"
-            animate={{ rotate: -360 }}
+            className="absolute w-[500px] h-[500px] bg-emerald-500/20 rounded-full -bottom-36 -right-36 blur-3xl"
+            animate={{ rotate: -360, scale: [1, 1.2, 1] }}
             transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
           />
         </div>
@@ -465,18 +493,76 @@ const GreenVehicleExpo = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center text-white"
+            className="text-center text-white mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">
-              Be Part of India's Largest<br />
-              Electric Vehicle Expo
+            {/* Mock Stats Bar */}
+            <div className="grid grid-cols-2 md:flex md:flex-wrap justify-center gap-4 md:gap-8 mb-12">
+              {[
+                { label: "Anticipated Visitors", value: "50,000+" },
+                { label: "Exhibitors", value: "300+" },
+                { label: "Product Launches", value: "50+" },
+                { label: "Media Partners", value: "40+" }
+              ].map((stat, i) => (
+                <div key={i} className="text-center p-2">
+                  <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
+                  <div className="text-xs text-emerald-400 uppercase tracking-widest font-semibold">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md">
+              <span className="text-emerald-400 font-semibold text-sm tracking-wider uppercase">Join the Green Mobility Revolution</span>
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold mb-8 tracking-tight leading-tight">
+              Be Part of India's Most Significant<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400 inline-block">
+                Electric Vehicle & Future Expo
+              </span>
             </h2>
-            <p className="text-xl opacity-90 mb-10 max-w-2xl mx-auto">
-              Join industry leaders, innovators, and visionaries shaping the future of sustainable transportation in India.
+            <p className="text-xl text-slate-100 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+              This isn't just an exhibition; it's a catalyst for the EV ecosystem. Connect with manufacturers, charging infrastructure providers, and policy makers in a high-octane B2B environment designed for growth.
             </p>
+
+            {/* Benefits Grid */}
+            <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-20 text-left">
+              {[
+                {
+                  icon: Users,
+                  title: "Strategic Networking",
+                  desc: "Engage with serious B2B buyers, distributors, and fleet owners actively seeking green solutions."
+                },
+                {
+                  icon: Award,
+                  title: "Brand Authority",
+                  desc: "Position your brand as a leader alongside industry giants like LOG9, BNC Motors, and government bodies."
+                },
+                {
+                  icon: Zap,
+                  title: "Direct Market Entry",
+                  desc: "The perfect venue to showcase your R&D breakthroughs to an audience ready for adoption."
+                }
+              ].map((benefit, idx) => (
+                <motion.div
+                  key={idx}
+                  whileHover={{ y: -5, backgroundColor: "rgba(255,255,255,0.08)" }}
+                  className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-3xl transition-all duration-300 shadow-2xl shadow-black/20"
+                >
+                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-2xl flex items-center justify-center mb-6 text-emerald-400 border border-emerald-400/30">
+                    <benefit.icon className="w-7 h-7" />
+                  </div>
+                  <h4 className="text-2xl font-bold mb-3 text-white">{benefit.title}</h4>
+                  <p className="text-slate-300 leading-relaxed">{benefit.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+
             <div className="flex flex-wrap justify-center gap-4">
-              <div className="w-full max-w-2xl mx-auto">
-                <h3 className="text-xl font-bold text-center mb-6 text-white">Book Your Stall</h3>
+              <div className="w-full max-w-3xl mx-auto">
+                <div className="flex items-center gap-4 mb-8 justify-center">
+                  <div className="h-px bg-white/20 flex-1"></div>
+                  <h3 className="text-2xl font-bold text-center text-white">Book Your Premium Stall</h3>
+                  <div className="h-px bg-white/20 flex-1"></div>
+                </div>
                 <StallBookingForm />
               </div>
             </div>
@@ -485,7 +571,7 @@ const GreenVehicleExpo = () => {
       </section>
 
       {/* Plan My Visit Section */}
-      <section className="py-20 bg-gradient-to-b from-teal/5 to-background relative overflow-hidden">
+      <section id="schedule" className="py-20 bg-gradient-to-b from-teal/5 to-background relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="container relative z-10">
           <div className="text-center mb-16">
@@ -502,7 +588,7 @@ const GreenVehicleExpo = () => {
               Get a personalized itinerary tailored to your interests and goals
             </p>
           </div>
-          
+
           <div className="max-w-4xl mx-auto">
             <PlanMyVisit />
           </div>
@@ -510,7 +596,7 @@ const GreenVehicleExpo = () => {
       </section>
 
       {/* Interactive Expo Map Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-teal/5 relative overflow-hidden">
+      <section id="exhibitors" className="py-20 bg-gradient-to-b from-background to-teal/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="container relative z-10">
           <div className="text-center mb-16">
@@ -527,7 +613,7 @@ const GreenVehicleExpo = () => {
               Navigate the exhibition with our interactive map
             </p>
           </div>
-          
+
           <div className="max-w-6xl mx-auto">
             <InteractiveExpoMap />
           </div>
@@ -535,7 +621,7 @@ const GreenVehicleExpo = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-teal/5 relative overflow-hidden">
+      <section id="contact" className="py-20 bg-gradient-to-b from-background to-teal/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="container relative z-10">
           <div className="text-center mb-16">
@@ -552,7 +638,7 @@ const GreenVehicleExpo = () => {
               Have questions about the expo? Reach out to our team
             </p>
           </div>
-          
+
           <div className="max-w-2xl mx-auto">
             <ContactForm />
           </div>
@@ -562,7 +648,7 @@ const GreenVehicleExpo = () => {
       {/* Footer */}
       <footer className="py-12 bg-card border-t border-border">
         <div className="container text-center">
-          <img 
+          <img
             src="https://greenvehicleexpo.com/wp-content/uploads/2019/05/Green-Vehicle-Expo-2026-logo-with-date.png"
             alt="Green Vehicle Expo"
             className="h-16 mx-auto mb-6 opacity-80"

@@ -4,14 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Search, 
-  MapPin, 
-  Filter, 
-  Car, 
-  Battery, 
-  Zap, 
-  Building, 
+import {
+  Search,
+  MapPin,
+  Filter,
+  Car,
+  Battery,
+  Zap,
+  Building,
   Navigation,
   RotateCcw,
   ZoomIn,
@@ -38,22 +38,44 @@ const categories: { value: PavilionCategory; label: string; icon: JSX.Element; c
   { value: "startups", label: "Startups", icon: <Building className="w-4 h-4" />, color: "bg-pink-500" },
 ];
 
+const MOCK_PAVILIONS: Pavilion[] = [
+  { id: "A1", name: "Tesla Motors", category: "4w", status: "occupied", coordinates: { x: 30, y: 30 }, size: "large", description: "Leading electric vehicle manufacturer showcasing Model S, 3, X, Y.", contact: "contact@tesla.com", technologies: ["Autopilot", "Supercharging"] },
+  { id: "A2", name: "Ola Electric", category: "2w", status: "occupied", coordinates: { x: 60, y: 30 }, size: "medium", description: "India's #1 E-Scooter manufacturer.", contact: "sales@olaelectric.com", technologies: ["Hypercharging", "MoveOS"] },
+  { id: "B1", name: "Ather Energy", category: "2w", status: "occupied", coordinates: { x: 45, y: 45 }, size: "medium", description: "Intelligent electric scooters.", contact: "info@ather.com", technologies: ["450X", "Fast Charging"] },
+  { id: "B2", name: "Exide Industries", category: "battery", status: "occupied", coordinates: { x: 30, y: 60 }, size: "large", description: "Advanced battery solutions for EVs.", contact: "export@exide.com", technologies: ["Li-ion", "Battery Swapping"] },
+  { id: "C1", name: "Tata Power", category: "charging", status: "occupied", coordinates: { x: 70, y: 60 }, size: "medium", description: "Largest EV charging network in India.", contact: "evcharging@tatapower.com", technologies: ["EZ Charge", "Fast Chargers"] },
+  { id: "C2", name: "Mahindra Electric", category: "4w", status: "occupied", coordinates: { x: 50, y: 20 }, size: "large", description: "Pioneers of electric mobility in India.", contact: "support@mahindra.com", technologies: ["BE.05", "XUV400"] },
+  { id: "D1", name: "Kinetic Green", category: "3w", status: "occupied", coordinates: { x: 20, y: 45 }, size: "medium", description: "Electric three-wheelers for last mile connectivity.", contact: "sales@kinetic.com", technologies: ["E-Rickshaw", "Loader"] },
+  { id: "E1", name: "Bolt.Earth", category: "startups", status: "occupied", coordinates: { x: 80, y: 40 }, size: "small", description: "Smart EV charging infrastructure operating system.", contact: "hello@bolt.earth", technologies: ["OS", "IoT"] },
+  { id: "E2", name: "Log9 Materials", category: "battery", status: "occupied", coordinates: { x: 60, y: 75 }, size: "small", description: "Advanced battery technology startup.", contact: "contact@log9.com", technologies: ["Rapid Charging", "Graphene"] },
+];
+
 export const InteractiveExpoMap = () => {
   // State for pavilions data
   const [pavilions, setPavilions] = useState<Pavilion[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load pavilions from database
+  // Load pavilions from database or mock
   useEffect(() => {
     const loadPavilions = async () => {
       setLoading(true);
-      const result = await getAllPavilions();
-      if (result.data) {
-        setPavilions(result.data);
+      try {
+        const result = await getAllPavilions();
+        if (result.data && result.data.length > 0) {
+          setPavilions(result.data);
+        } else {
+          // Fallback to mock data if DB is empty or fails
+          console.log("Using mock data for map");
+          setPavilions(MOCK_PAVILIONS as unknown as Pavilion[]);
+        }
+      } catch (e) {
+        console.log("Error loading pavilions, using mock data", e);
+        setPavilions(MOCK_PAVILIONS as unknown as Pavilion[]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
-    
+
     loadPavilions();
   }, []);
 
@@ -73,17 +95,17 @@ export const InteractiveExpoMap = () => {
   const filteredPavilions = pavilions.filter(pavilion => {
     const matchesCategory = selectedCategory === "all" || pavilion.category === selectedCategory;
     const matchesSearch = pavilion.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pavilion.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (pavilion.technologies && pavilion.technologies.some(tech => 
-                           tech.toLowerCase().includes(searchTerm.toLowerCase())
-                         ));
+      pavilion.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (pavilion.technologies && pavilion.technologies.some(tech =>
+        tech.toLowerCase().includes(searchTerm.toLowerCase())
+      ));
     return matchesCategory && matchesSearch;
   });
 
   // Handle pavilion click
   const handlePavilionClick = (pavilion: Pavilion) => {
     setSelectedPavilion(pavilion);
-    
+
     if (navigationMode) {
       if (!startPoint) {
         setStartPoint(pavilion);
@@ -110,11 +132,11 @@ export const InteractiveExpoMap = () => {
   // Handle map drag (simplified for demo)
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // Only left mouse button
-    
+
     const startX = e.clientX;
     const startY = e.clientY;
     const startPos = { ...mapPosition };
-    
+
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const dx = moveEvent.clientX - startX;
       const dy = moveEvent.clientY - startY;
@@ -123,12 +145,12 @@ export const InteractiveExpoMap = () => {
         y: startPos.y + dy
       });
     };
-    
+
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-    
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
@@ -313,21 +335,21 @@ export const InteractiveExpoMap = () => {
               <TabsTrigger value="2d">2D Map</TabsTrigger>
               <TabsTrigger value="3d">3D View</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="2d" className="relative">
-              <div 
+              <div
                 ref={mapRef}
-                className="relative w-full h-[500px] bg-gradient-to-br from-teal/10 to-emerald-500/10 rounded-lg border border-teal/30 overflow-hidden"
+                className="relative w-full h-[400px] lg:h-[500px] bg-gradient-to-br from-teal/10 to-emerald-500/10 rounded-lg border border-teal/30 overflow-hidden"
                 onMouseDown={handleMouseDown}
               >
                 {/* Grid background */}
                 <div className="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-10"></div>
-                
+
                 {/* Main halls */}
                 <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-card/50 border border-dashed border-teal/30 rounded-lg flex items-center justify-center">
                   <span className="text-muted-foreground text-sm font-medium">Main Exhibition Hall</span>
                 </div>
-                
+
                 {/* Pavilions */}
                 {loading ? (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -338,43 +360,41 @@ export const InteractiveExpoMap = () => {
                   </div>
                 ) : (
                   filteredPavilions.map((pavilion) => {
-                  const sizeClasses = {
-                    small: "w-8 h-8",
-                    medium: "w-12 h-12",
-                    large: "w-16 h-16"
-                  };
-                  
-                  return (
-                    <motion.div
-                      key={pavilion.id}
-                      className={`absolute cursor-pointer rounded-lg flex items-center justify-center border-2 ${
-                        selectedPavilion?.id === pavilion.id 
-                          ? "border-teal shadow-lg scale-110 z-10" 
+                    const sizeClasses = {
+                      small: "w-8 h-8",
+                      medium: "w-12 h-12",
+                      large: "w-16 h-16"
+                    };
+
+                    return (
+                      <motion.div
+                        key={pavilion.id}
+                        className={`absolute cursor-pointer rounded-lg flex items-center justify-center border-2 ${selectedPavilion?.id === pavilion.id
+                          ? "border-teal shadow-lg scale-110 z-10"
                           : "border-border hover:border-teal hover:shadow-md"
-                      } ${sizeClasses[pavilion.size]} ${getCategoryColor(pavilion.category)} ${
-                        pavilion.status === "occupied" ? "bg-opacity-90" : "bg-opacity-50"
-                      }`}
-                      style={{
-                        left: `${pavilion.coordinates.x}%`,
-                        top: `${pavilion.coordinates.y}%`,
-                        transform: `translate(-50%, -50%) scale(${zoomLevel})`,
-                      }}
-                      onClick={() => handlePavilionClick(pavilion)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      title={pavilion.name}
-                    >
-                      <span className="text-xs font-bold text-white">
-                        {pavilion.id}
-                      </span>
-                    </motion.div>
-                  );
-                })
-              )}
-              
-              {/* Navigation Path (if active) */}
-              {startPoint && endPoint && (
-                <svg 
+                          } ${sizeClasses[pavilion.size]} ${getCategoryColor(pavilion.category)} ${pavilion.status === "occupied" ? "bg-opacity-90" : "bg-opacity-50"
+                          }`}
+                        style={{
+                          left: `${pavilion.coordinates.x}%`,
+                          top: `${pavilion.coordinates.y}%`,
+                          transform: `translate(-50%, -50%) scale(${zoomLevel})`,
+                        }}
+                        onClick={() => handlePavilionClick(pavilion)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        title={pavilion.name}
+                      >
+                        <span className="text-xs font-bold text-white">
+                          {pavilion.id}
+                        </span>
+                      </motion.div>
+                    );
+                  })
+                )}
+
+                {/* Navigation Path (if active) */}
+                {startPoint && endPoint && (
+                  <svg
                     className="absolute inset-0 w-full h-full pointer-events-none"
                     style={{ transform: `scale(${zoomLevel})` }}
                   >
@@ -401,14 +421,14 @@ export const InteractiveExpoMap = () => {
                     />
                   </svg>
                 )}
-                
+
                 {/* Zoom level indicator */}
                 <div className="absolute bottom-4 right-4 bg-background/80 backdrop-blur-sm p-2 rounded-lg border">
                   <span className="text-sm">Zoom: {Math.round(zoomLevel * 100)}%</span>
                 </div>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="3d" className="relative">
               <div className="relative w-full h-[500px] bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg border border-teal/30 overflow-hidden flex items-center justify-center">
                 <div className="text-center">
@@ -426,7 +446,7 @@ export const InteractiveExpoMap = () => {
               </div>
             </TabsContent>
           </Tabs>
-          
+
           {/* Legend */}
           <div className="mt-4 flex flex-wrap gap-4 justify-center">
             {categories.map((cat) => (
