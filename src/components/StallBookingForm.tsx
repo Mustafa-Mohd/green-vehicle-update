@@ -185,7 +185,7 @@ export const StallBookingForm = () => {
                         value={formData.space_requirement}
                         onChange={handleChange}
                         min={formData.booth_type === 'bare_space' ? 18 : 9}
-                        className="w-24 text-right font-bold text-lg"
+                        className="w-24 text-right font-bold text-lg text-black"
                       />
                       <span className="text-muted-foreground">sqm</span>
                     </div>
