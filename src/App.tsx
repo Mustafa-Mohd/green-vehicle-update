@@ -13,6 +13,7 @@ import ContactPage from "./pages/ContactPage";
 import SponsorshipPage from "./pages/SponsorshipPage";
 import ScrollToTop from "./components/ScrollToTop";
 import { ChatBot } from "./components/ChatBot";
+import AdminChats from "./pages/AdminChats";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/events/green-vehicle-expo" element={<GreenVehicleExpo />} />
           <Route path="/events/green-vehicle-expo/about" element={<AboutOrganizerPage />} />
           <Route path="/events/green-vehicle-expo/sponsorship" element={<SponsorshipPage />} />
+          <Route path="/admin/chats" element={<AdminChats />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

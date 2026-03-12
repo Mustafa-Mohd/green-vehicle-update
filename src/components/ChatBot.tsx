@@ -14,8 +14,10 @@ import {
     isValidEmail,
     isValidPhone,
     mockSaveVisitor,
-    mockSaveExhibitor
+    mockSaveExhibitor,
+    mockSaveLeadAndChat
 } from "@/lib/chatbotWorkflows";
+import { askAIContext } from "@/lib/aiService";
 
 interface Message {
     role: "user" | "bot";
@@ -28,8 +30,8 @@ export const ChatBot = () => {
     const [messages, setMessages] = useState<Message[]>([
         {
             role: "bot",
-            text: "Welcome to the **Green Vehicle Expo 2026 Assistant 🚗⚡**\n\nExplore the future of **electric and hybrid mobility** at the **BIEC Bangalore** from **29–31 July 2026**.\n\nI can help you **register as a visitor** or **book a stall** for the event.",
-            options: ["Register as Visitor", "Book a Stall", "Event Information", "Speak to Human"]
+            text: "Greetings! 👋 I am the **Media Day Assistant**.\n\nI can help you explore our upcoming events, answer your questions, or assist you with secure registrations and stall bookings.\n\nHow can I help you today?",
+            options: QUICK_MENU_OPTIONS
         }
     ]);
     const [input, setInput] = useState("");
@@ -64,53 +66,137 @@ export const ChatBot = () => {
         // Give it a tiny delay to feel conversational
         await new Promise((res) => setTimeout(res, 600));
 
-        // Common Fallback / Quick Menu check
-        if (QUICK_MENU_OPTIONS.includes(userInput) || userInput === "Start Over" || userInput === "Event Information" || userInput === "Speak to Human") {
-            if (userInput === "Register as Visitor") {
-                setFlowState({ activeFlow: "visitor", step: "name", data: {} });
-                addBotMessage("Let's start with your details.\n\nPlease enter your **Full Name**\n*(as per your government ID)*");
-            } else if (userInput === "Book a Stall" || userInput === "Stall Booking") {
-                setFlowState({ activeFlow: "exhibitor", step: "name", data: {} });
-                addBotMessage("Interested in **exhibiting at Green Vehicle Expo 2026?**\nExhibiting gives you access to industry professionals, OEMs, suppliers, and investors.\n\nLet's collect a few details about your company.\n\nPlease enter your **Name**");
-            } else if (userInput === "Event Information") {
+        const userMessage = userInput.toLowerCase().trim();
+        const smallTalk = ["hi", "hello", "hey", "how are you", "how r u", "how are u", "who are you", "good morning", "good evening", "good afternoon", "hola", "thanks", "ok", "assalamualaikum", "walaikum assalam", "i am", "i'm", "my name is", "iam "];
+        const questionWords = ["what", "where", "when", "why", "how", "which", "tell me", "can you", "who", "about", "explain", "help", "know", "website", "details"];
+
+        let intent = "workflow_input";
+        if (QUICK_MENU_OPTIONS.includes(userInput) || ["Start Over", "Event Information", "Speak to Human"].includes(userInput)) {
+            intent = "button_click";
+        } else if (smallTalk.some(w => userMessage.includes(w)) || questionWords.some(w => userMessage.includes(w)) || userMessage.includes("?")) {
+            intent = "question";
+        } else if (flowState.activeFlow === "idle") {
+            // Anything unrecognized in idle goes to AI
+            intent = "question";
+        }
+
+        // 1. AI Routing & Interruptions
+        if (intent === "question") {
+            try {
+                const aiResponse = await askAIContext(userInput, messages.slice(-5));
+
+                if (flowState.activeFlow !== "idle") {
+                    const { step, data } = flowState;
+                    let field = "";
+                    let action = "your registration";
+
+                    if (flowState.activeFlow === "collect_lead") {
+                        field = step === "name" ? "Full Name" : step === "email" ? "Email Address" : "Phone Number";
+                        action = data.intendedAction ? `your ${data.intendedAction}` : action;
+                    } else if (flowState.activeFlow === "visitor") {
+                        field = step === "company" ? "Company Name" : step === "role" ? "Job Title" : step === "interest" ? "interest area" : step === "visit_type" ? "visit type" : "terms acceptance";
+                        action = "visitor registration";
+                    } else if (flowState.activeFlow === "exhibitor") {
+                        field = step === "category" ? "category" : step === "space_req" ? "space requirement" : "product description";
+                        action = "stall booking";
+                    }
+
+                    addBotMessage(aiResponse + `\n\nBy the way, could I still get your **${field}** to continue ${action}?`);
+                } else {
+                    addBotMessage(aiResponse, QUICK_MENU_OPTIONS);
+                }
+
+                // Save AI interaction too if we have lead info
+                if (flowState.data.email) {
+                    await mockSaveLeadAndChat(flowState.data, [...messages, { role: "user", text: userInput }, { role: "bot", text: aiResponse }]);
+                }
+            } catch (error) {
+                console.error("AI Context Error:", error);
+                addBotMessage("Sorry, I am having trouble connecting to my knowledge base right now. Please try again or use the main menu.", QUICK_MENU_OPTIONS);
+            }
+            setIsLoading(false);
+            return;
+        }
+
+        // 2. Button Clicks & Quick Menu overrides
+        if (intent === "button_click") {
+            if (userInput.toLowerCase() === "start over") {
                 setFlowState({ activeFlow: "idle", step: "start", data: {} });
+                addBotMessage("Greetings! How can I help you today?", QUICK_MENU_OPTIONS);
+            } else if (userInput === "Register as Visitor") {
+                if (flowState.data.email) {
+                    setFlowState({ activeFlow: "visitor", step: "company", data: flowState.data });
+                    addBotMessage("Let's continue with your visitor registration.\n\nPlease provide your **Company Name**");
+                } else {
+                    setFlowState({ activeFlow: "collect_lead", step: "name", data: { ...flowState.data, intendedAction: "Register as Visitor" } });
+                    addBotMessage("I'd love to help you register! To get started securely, please tell me your **Full Name**\n*(as per your government ID)*");
+                }
+            } else if (userInput === "Book a Stall" || userInput === "Stall Booking") {
+                if (flowState.data.email) {
+                    setFlowState({ activeFlow: "exhibitor", step: "category", data: flowState.data });
+                    addBotMessage("Interested in **exhibiting at Green Vehicle Expo 2026?**\nLet's continue gathering a few details.\n\nSelect the category that best describes your company.", EXHIBITOR_CATEGORIES);
+                } else {
+                    setFlowState({ activeFlow: "collect_lead", step: "name", data: { ...flowState.data, intendedAction: "Book a Stall" } });
+                    addBotMessage("Interested in **exhibiting at Green Vehicle Expo 2026?** Exhibiting gives you access to industry professionals, OEMs, and investors.\n\nBefore we capture the stall requirement, please tell me your **Full Name**");
+                }
+            } else if (userInput === "Event Information") {
+                setFlowState({ activeFlow: "idle", step: "start", data: flowState.data });
                 addBotMessage(EVENT_INFO, ["Register as Visitor", "Book a Stall"]);
             } else if (userInput === "Venue Location") {
-                setFlowState({ activeFlow: "idle", step: "start", data: {} });
+                setFlowState({ activeFlow: "idle", step: "start", data: flowState.data });
                 addBotMessage("📍 **Venue:** Bangalore International Exhibition Centre (BIEC)\n10th Mile, Tumkur Road, Madavara Post, Dasanapura Hubli, Bengaluru, Karnataka 562123", ["Register as Visitor", "Book a Stall"]);
             } else if (userInput === "Speak to Human") {
-                setFlowState({ activeFlow: "idle", step: "start", data: {} });
+                setFlowState({ activeFlow: "idle", step: "start", data: flowState.data });
                 addBotMessage("Our support team will get in touch with you shortly. You can also reach us at support@greenvehicleexpo.com", QUICK_MENU_OPTIONS);
             } else {
-                setFlowState({ activeFlow: "idle", step: "start", data: {} });
+                setFlowState({ activeFlow: "idle", step: "start", data: flowState.data });
                 addBotMessage("How can I help you today?", QUICK_MENU_OPTIONS);
             }
             setIsLoading(false);
             return;
         }
 
-        // PROCESS VISITOR FLOW
-        if (flowState.activeFlow === "visitor") {
+        // 3. Workflow Input Processing
+        if (flowState.activeFlow === "collect_lead") {
             const { step, data } = flowState;
 
             if (step === "name") {
                 setFlowState({ ...flowState, step: "email", data: { ...data, name: userInput } });
-                addBotMessage(`Thanks ${userInput}.\nPlease enter your **Official Email Address**\n(e.g., name@company.com)`);
+                addBotMessage(`Thanks ${userInput}! Please enter your **Email Address**.`);
             } else if (step === "email") {
                 if (!isValidEmail(userInput)) {
-                    addBotMessage("Please enter a valid email address containing '@' and a domain.");
+                    addBotMessage("Please enter a valid email address.");
                 } else {
                     setFlowState({ ...flowState, step: "phone", data: { ...data, email: userInput } });
-                    addBotMessage("Please enter your **Mobile Number**\nFormat: +91 followed by 10 digits (e.g. +919876543210)");
+                    addBotMessage("Great! Finally, please enter your **Phone Number**.");
                 }
             } else if (step === "phone") {
                 if (!isValidPhone(userInput)) {
-                    addBotMessage("Please enter a valid phone number, starting with +91 and followed by 10 digits.");
+                    addBotMessage("Please enter a valid phone number, starting with +91.");
                 } else {
-                    setFlowState({ ...flowState, step: "company", data: { ...data, phone: userInput } });
-                    addBotMessage("Please provide your **Company Name**");
+                    const finalData = { ...data, phone: userInput } as any;
+                    await mockSaveLeadAndChat(finalData, [...messages, { role: "user", text: userInput }]);
+
+                    if (data.intendedAction === "Register as Visitor") {
+                        setFlowState({ activeFlow: "visitor", step: "company", data: finalData });
+                        addBotMessage(`Thank you, ${finalData.name}! Let's continue with your visitor registration.\n\nPlease provide your **Company Name**`);
+                    } else if (data.intendedAction === "Book a Stall") {
+                        setFlowState({ activeFlow: "exhibitor", step: "category", data: finalData });
+                        addBotMessage(`Thank you, ${finalData.name}! Let's continue gathering a few details for your stall booking.\n\nSelect the category that best describes your company.`, EXHIBITOR_CATEGORIES);
+                    } else {
+                        setFlowState({ activeFlow: "idle", step: "start", data: finalData });
+                        addBotMessage(`Thank you, ${finalData.name}! How can I help you further?`, QUICK_MENU_OPTIONS);
+                    }
                 }
-            } else if (step === "company") {
+            }
+            setIsLoading(false);
+            return;
+        }
+
+        if (flowState.activeFlow === "visitor") {
+            const { step, data } = flowState;
+
+            if (step === "company") {
                 setFlowState({ ...flowState, step: "role", data: { ...data, company: userInput } });
                 addBotMessage("Select your **Job Title / Role**", VISITOR_ROLES);
             } else if (step === "role") {
@@ -124,59 +210,39 @@ export const ChatBot = () => {
                 addBotMessage("Please review the entry requirements:\n✔ Entry allowed **only for visitors aged 18+**\n✔ Valid **Photo ID required at entry** (Aadhaar, Passport, DL, Company ID)\n\nDo you accept these terms?", ["Yes, I accept", "No"]);
             } else if (step === "compliance") {
                 if (userInput === "No") {
-                    setFlowState({ activeFlow: "idle", step: "start", data: {} });
+                    setFlowState({ activeFlow: "idle", step: "start", data: flowState.data });
                     addBotMessage("Registration cancelled. You must accept the terms to register.", QUICK_MENU_OPTIONS);
                 } else {
                     setFlowState({ ...flowState, step: "consent", data: { ...data, compliance: true } });
                     addBotMessage("Do you agree to receive **event updates and announcements** related to the expo?", ["Yes", "No"]);
                 }
             } else if (step === "consent") {
-                const finalData = { ...data, consent: userInput === "Yes" };
+                const finalData = { ...data, consent: userInput === "Yes" } as any;
                 await mockSaveVisitor(finalData);
-                setFlowState({ activeFlow: "idle", step: "start", data: {} });
+                setFlowState({ activeFlow: "idle", step: "start", data: finalData });
                 addBotMessage(`🎉 **Registration Complete!**\n\nThank you **${finalData.name}** for registering for **Green Vehicle Expo 2026**.\nYour registration details have been successfully recorded.\n\n📍 **Venue:** Bangalore International Exhibition Centre\n📅 **Dates:** 29 – 31 July 2026\n🕘 **Entry Time:** 9:30 AM onwards\n\nPlease bring:\n- Valid Photo ID\n- Business Card (recommended)\n\nWe look forward to welcoming you! 🚗⚡`, QUICK_MENU_OPTIONS);
             }
+            setIsLoading(false);
+            return;
         }
-        // PROCESS EXHIBITOR FLOW
-        else if (flowState.activeFlow === "exhibitor") {
+
+        if (flowState.activeFlow === "exhibitor") {
             const { step, data } = flowState;
 
-            if (step === "name") {
-                setFlowState({ ...flowState, step: "company", data: { ...data, name: userInput } });
-                addBotMessage(`Thanks ${userInput}.\nPlease enter your **Company Name**`);
-            } else if (step === "company") {
-                setFlowState({ ...flowState, step: "email", data: { ...data, company: userInput } });
-                addBotMessage("Please enter your **Official Email**");
-            } else if (step === "email") {
-                if (!isValidEmail(userInput)) {
-                    addBotMessage("Please enter a valid email address containing '@' and a domain.");
-                } else {
-                    setFlowState({ ...flowState, step: "phone", data: { ...data, email: userInput } });
-                    addBotMessage("Please enter your **Contact Number** (e.g., +919876543210)");
-                }
-            } else if (step === "phone") {
-                if (!isValidPhone(userInput)) {
-                    addBotMessage("Please enter a valid phone number, starting with +91.");
-                } else {
-                    setFlowState({ ...flowState, step: "category", data: { ...data, phone: userInput } });
-                    addBotMessage("Select the category that best describes your company.", EXHIBITOR_CATEGORIES);
-                }
-            } else if (step === "category") {
+            if (step === "category") {
                 setFlowState({ ...flowState, step: "space_req", data: { ...data, category: userInput } });
                 addBotMessage("Do you have an estimated **stall space requirement**?", ["Bare Space (min 36 sqm)", "Shell Scheme (9 sqm)", "Shell Scheme (12 sqm)", "Shell Scheme (18 sqm)", "Not Sure - Need Assistance"]);
             } else if (step === "space_req") {
                 setFlowState({ ...flowState, step: "product_desc", data: { ...data, stall_type: userInput } });
                 addBotMessage("Please briefly describe **what products or services you plan to showcase** (e.g., EV batteries, charging stations, software)");
             } else if (step === "product_desc") {
-                const finalData = { ...data, product_description: userInput };
+                const finalData = { ...data, product_description: userInput } as any;
                 await mockSaveExhibitor(finalData);
-                setFlowState({ activeFlow: "idle", step: "start", data: {} });
-                addBotMessage(`✅ **Thank you for your interest in exhibiting!**\n\nYour exhibitor enquiry has been successfully recorded.\nA representative will review your request and assist you with:\n- Stall options\n- Space planning\n- Participation details\n\nWe look forward to having **${finalData.company}** at **Green Vehicle Expo 2026** 🚗⚡`, QUICK_MENU_OPTIONS);
+                setFlowState({ activeFlow: "idle", step: "start", data: finalData });
+                addBotMessage(`✅ **Thank you for your interest in exhibiting!**\n\nYour exhibitor enquiry has been successfully recorded.\nA representative will review your request and assist you with:\n- Stall options\n- Space planning\n- Participation details\n\nWe look forward to having **${finalData.company || finalData.name}** at **Green Vehicle Expo 2026** 🚗⚡`, QUICK_MENU_OPTIONS);
             }
-        }
-        // FALLBACK
-        else {
-            addBotMessage("I'm sorry, I didn't understand that. Please choose one of the options below.", QUICK_MENU_OPTIONS);
+            setIsLoading(false);
+            return;
         }
 
         setIsLoading(false);

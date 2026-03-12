@@ -1,5 +1,5 @@
 export type FlowState = {
-    activeFlow: 'idle' | 'visitor' | 'exhibitor' | 'human' | 'info';
+    activeFlow: 'idle' | 'visitor' | 'exhibitor' | 'human' | 'info' | 'collect_lead' | 'ai_chat';
     step: string;
     data: Record<string, any>;
 };
@@ -64,12 +64,42 @@ export const EXHIBITOR_CATEGORIES = [
     "Other"
 ];
 
+import { supabase } from './supabase';
+
 export const mockSaveVisitor = async (data: any) => {
-    console.table(data);
+    console.table("Visitor Registration:", data);
+    try {
+        await supabase.from('chatbot_visitors').insert([data]);
+    } catch (e) {
+        console.error("Supabase insert failed", e);
+    }
     return { success: true };
 };
 
 export const mockSaveExhibitor = async (data: any) => {
-    console.table(data);
+    console.table("Exhibitor Registration:", data);
+    try {
+        await supabase.from('chatbot_exhibitors').insert([data]);
+    } catch (e) {
+        console.error("Supabase insert failed", e);
+    }
+    return { success: true };
+};
+
+export const mockSaveLeadAndChat = async (data: any, chatHistory: any[]) => {
+    console.log("Saving Lead Information:", data);
+    console.log("Saving Chat History:", chatHistory);
+    try {
+        await supabase.from('chatbot_leads').insert([{
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            chat_history: chatHistory,
+            last_updated: new Date().toISOString()
+        }]);
+    } catch (e) {
+        console.error("Failed to save to Supabase", e);
+    }
+
     return { success: true };
 };
